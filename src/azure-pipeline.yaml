@@ -6,12 +6,11 @@ pool:
 
 variables:
   terraformVersion: "0.14.7"
-  action: "create" # can be set to 'create' or 'destroy'
 
 stages:
-  - stage: Terraform
+  - stage: Initialize
     jobs:
-      - job: Terraform
+      - job: Init
         steps:
           - task: TerraformInstaller@0
             inputs:
@@ -21,11 +20,39 @@ stages:
               terraform init
             displayName: "Initialize Terraform"
 
+  - stage: UserInput
+    dependsOn: Initialize
+    jobs:
+      - job: WaitForUserInput
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              notifyUsers: "user@example.com" # Replace with the email of the user to notify
+              instructions: "Please select an action: create or destroy"
+              timeout: "0" # Timeout in hours, 0 means no timeout
+              onTimeout: "reject"
+
+  - stage: ApplyOrDestroy
+    dependsOn: UserInput
+    jobs:
+      - job: Terraform
+        steps:
           - script: |
+              echo "User input: $(action)"
               if [ "$(action)" == "create" ]; then
-                terraform apply -auto-approve
+                terraform apply -auto-approve \
+                  -var subscription_id=$(subscription_id) \
+                  -var resource_group_name=$(resource_group_name) \
+                  -var vnet_name=$(vnet_name) \
+                  -var subnet_name=$(subnet_name) \
+                  -var admin_password=$(admin_password)
               elif [ "$(action)" == "destroy" ]; then
-                terraform destroy -auto-approve
+                terraform destroy -auto-approve \
+                  -var subscription_id=$(subscription_id) \
+                  -var resource_group_name=$(resource_group_name) \
+                  -var vnet_name=$(vnet_name) \
+                  -var subnet_name=$(subnet_name) \
+                  -var admin_password=$(admin_password)
               else
                 echo "Invalid action: $(action)"
                 exit 1
