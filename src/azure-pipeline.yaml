@@ -1,0 +1,32 @@
+trigger:
+  - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  terraformVersion: "0.14.7"
+  action: "create" # can be set to 'create' or 'destroy'
+
+stages:
+  - stage: Terraform
+    jobs:
+      - job: Terraform
+        steps:
+          - task: TerraformInstaller@0
+            inputs:
+              terraformVersion: $(terraformVersion)
+
+          - script: |
+              terraform init
+            displayName: "Initialize Terraform"
+
+          - script: |
+              if [ "$(action)" == "create" ]; then
+                terraform apply -auto-approve
+              elif [ "$(action)" == "destroy" ]; then
+                terraform destroy -auto-approve
+              else
+                echo "Invalid action: $(action)"
+                exit 1
+            displayName: "Apply or Destroy Terraform"

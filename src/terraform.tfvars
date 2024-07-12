@@ -1,0 +1,5 @@
+subscription_id     = "<your_subscription_id>"
+resource_group_name = "<your_resource_group_name>"
+vnet_name           = "<your_vnet_name>"
+subnet_name         = "<your_subnet_name>"
+admin_password      = "<your_admin_password>"
