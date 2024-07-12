@@ -47,12 +47,7 @@ stages:
                   -var subnet_name=$(subnet_name) \
                   -var admin_password=$(admin_password)
               elif [ "$(action)" == "destroy" ]; then
-                terraform destroy -auto-approve \
-                  -var subscription_id=$(subscription_id) \
-                  -var resource_group_name=$(resource_group_name) \
-                  -var vnet_name=$(vnet_name) \
-                  -var subnet_name=$(subnet_name) \
-                  -var admin_password=$(admin_password)
+                terraform destroy -auto-approve
               else
                 echo "Invalid action: $(action)"
                 exit 1
